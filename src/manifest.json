@@ -1,0 +1,53 @@
+{
+  "package": "com.quanneng.dict",
+  "name": "全能词典",
+  "versionName": "V1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1070,
+  "icon": "/assets/images/logo.png",
+  "features": [
+    {
+      "name": "system.prompt"
+    },
+    {
+      "name": "system.router"
+    },
+    {
+      "name": "system.fetch"
+    },
+    {
+      "name": "system.configuration"
+    }
+  ],
+  "permissions": [
+    {
+      "origin": "*"
+    }
+  ],
+  "config": {
+    "logLevel": "debug",
+    "designWidth": 466
+  },
+  "router": {
+    "entry": "pages/Dict",
+    "pages": {
+      "pages/Dict": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#1a1a2e",
+    "titleBarTextColor": "#ffffff",
+    "menu": false,
+    "pages": {
+      "pages/Dict": {
+        "titleBarText": "全能词典",
+        "menu": false
+      }
+    }
+  },
+  "deviceTypeList": [
+    "watch"
+  ]
+}

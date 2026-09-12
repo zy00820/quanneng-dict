@@ -1,0 +1,15 @@
+node_modules
+build
+
+.DS_Store
+Thumbs.db
+
+*.log
+*.iml
+.idea/
+.vscode/
+
+.nyc_output
+/coverage
+
+/logs

@@ -1,0 +1,316 @@
+<!--
+  全能词典 V1.0.0
+  适配 iQOO Watch GT2 / Blue OS 3.0
+-->
+
+<template>
+  <div class="page">
+    <!-- 顶部标题 -->
+    <div class="header">
+      <text class="app-title">全能词典</text>
+    </div>
+
+    <!-- 搜索区域 -->
+    <div class="search-area">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="输入单词..."
+        value="{{ keyword }}"
+        onchange="onKeywordChange"
+      />
+      <input
+        class="search-btn"
+        type="button"
+        value="查询"
+        onclick="onSearch"
+      />
+    </div>
+
+    <!-- 快捷单词 -->
+    <div class="quick-words">
+      <text
+        class="quick-word"
+        for="{{ quickWords }}"
+        onclick="onQuickWord($item)"
+      >{{ $item }}</text>
+    </div>
+
+    <!-- 加载中 -->
+    <div class="loading" if="{{ loading }}">
+      <text class="loading-text">查询中...</text>
+    </div>
+
+    <!-- 查询结果 -->
+    <scroll class="result-area" if="{{ result && !loading }}">
+      <div class="result-word">
+        <text class="word-text">{{ result.word }}</text>
+        <text class="phonetic-text" if="{{ result.phonetic }}">{{ result.phonetic }}</text>
+      </div>
+
+      <div class="meaning-list" for="{{ result.meanings }}">
+        <text class="pos-text">{{ $item.partOfSpeech }}</text>
+        <div class="def-list" for="{{ $item.definitions }}">
+          <text class="def-text">• {{ $item.definition }}</text>
+          <text class="example-text" if="{{ $item.example }}">例：{{ $item.example }}</text>
+        </div>
+      </div>
+    </scroll>
+
+    <!-- 空状态 -->
+    <div class="empty" if="{{ !result && !loading }}">
+      <text class="empty-text">输入英文单词开始查询</text>
+      <text class="empty-sub">支持音标、释义、例句</text>
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="error" if="{{ errorMsg && !loading }}">
+      <text class="error-text">{{ errorMsg }}</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import dictionary from '../../helper/apis/dictionary'
+
+export default {
+  private: {
+    keyword: '',
+    loading: false,
+    result: null,
+    errorMsg: '',
+    quickWords: ['hello', 'world', 'apple', 'study', 'happy']
+  },
+
+  onKeywordChange(e) {
+    this.keyword = e.value
+  },
+
+  onQuickWord(word) {
+    this.keyword = word
+    this.search(word)
+  },
+
+  onSearch() {
+    const word = (this.keyword || '').trim()
+    if (!word) {
+      this.errorMsg = '请输入要查询的单词'
+      this.result = null
+      return
+    }
+    this.search(word)
+  },
+
+  search(word) {
+    this.loading = true
+    this.errorMsg = ''
+    this.result = null
+
+    dictionary
+      .lookupWord(word)
+      .then((data) => {
+        if (data) {
+          this.result = data
+        } else {
+          this.errorMsg = '未查询到结果'
+        }
+      })
+      .catch((err) => {
+        this.errorMsg = err.message || '查询失败'
+      })
+      .finally(() => {
+        this.loading = false
+      })
+  }
+}
+</script>
+
+<style lang="scss">
+@import './../../assets/styles/style.scss';
+
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0f1e;
+}
+
+.header {
+  width: 100%;
+  height: 56 * $size-factor;
+  justify-content: center;
+  align-items: center;
+  padding-top: 8 * $size-factor;
+}
+
+.app-title {
+  font-size: 22 * $size-factor;
+  color: #4facfe;
+  font-weight: bold;
+  text-align: center;
+}
+
+.search-area {
+  flex-direction: row;
+  width: 100%;
+  height: 56 * $size-factor;
+  align-items: center;
+  justify-content: center;
+  padding-left: 12 * $size-factor;
+  padding-right: 12 * $size-factor;
+  margin-top: 4 * $size-factor;
+}
+
+.search-input {
+  flex: 1;
+  height: 44 * $size-factor;
+  background-color: #1e1e36;
+  border-radius: 22 * $size-factor;
+  color: #ffffff;
+  font-size: 16 * $size-factor;
+  padding-left: 16 * $size-factor;
+  padding-right: 16 * $size-factor;
+}
+
+.search-btn {
+  width: 64 * $size-factor;
+  height: 44 * $size-factor;
+  margin-left: 8 * $size-factor;
+  border-radius: 22 * $size-factor;
+  background-color: $brand;
+  color: #ffffff;
+  font-size: 15 * $size-factor;
+}
+
+.quick-words {
+  flex-direction: row;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-left: 10 * $size-factor;
+  padding-right: 10 * $size-factor;
+  margin-top: 6 * $size-factor;
+}
+
+.quick-word {
+  font-size: 12 * $size-factor;
+  color: #8ab4f8;
+  background-color: #1a1a33;
+  border-radius: 10 * $size-factor;
+  padding: 4 * $size-factor 10 * $size-factor;
+  margin: 3 * $size-factor;
+}
+
+.loading {
+  width: 100%;
+  height: 60 * $size-factor;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20 * $size-factor;
+}
+
+.loading-text {
+  font-size: 15 * $size-factor;
+  color: $brand;
+}
+
+.result-area {
+  flex: 1;
+  width: 100%;
+  padding-left: 14 * $size-factor;
+  padding-right: 14 * $size-factor;
+  padding-top: 6 * $size-factor;
+}
+
+.result-word {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10 * $size-factor;
+}
+
+.word-text {
+  font-size: 26 * $size-factor;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.phonetic-text {
+  font-size: 14 * $size-factor;
+  color: #9fa8da;
+  margin-top: 4 * $size-factor;
+}
+
+.meaning-list {
+  width: 100%;
+  flex-direction: column;
+  margin-bottom: 10 * $size-factor;
+  background-color: #1a1a33;
+  border-radius: 12 * $size-factor;
+  padding: 10 * $size-factor;
+}
+
+.pos-text {
+  font-size: 14 * $size-factor;
+  color: $brand;
+  font-weight: bold;
+  margin-bottom: 6 * $size-factor;
+}
+
+.def-list {
+  width: 100%;
+  flex-direction: column;
+  margin-bottom: 6 * $size-factor;
+}
+
+.def-text {
+  font-size: 13 * $size-factor;
+  color: #e0e0e0;
+  line-height: 18 * $size-factor;
+}
+
+.example-text {
+  font-size: 12 * $size-factor;
+  color: #8a8a9a;
+  line-height: 16 * $size-factor;
+  margin-top: 4 * $size-factor;
+  padding-left: 12 * $size-factor;
+}
+
+.empty {
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-text {
+  font-size: 15 * $size-factor;
+  color: #6a6a8a;
+  text-align: center;
+}
+
+.empty-sub {
+  font-size: 12 * $size-factor;
+  color: #4a4a6a;
+  text-align: center;
+  margin-top: 6 * $size-factor;
+}
+
+.error {
+  width: 100%;
+  height: 60 * $size-factor;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10 * $size-factor;
+}
+
+.error-text {
+  font-size: 14 * $size-factor;
+  color: #ff6b6b;
+  text-align: center;
+  padding-left: 20 * $size-factor;
+  padding-right: 20 * $size-factor;
+}
+</style>
