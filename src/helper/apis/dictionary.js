@@ -87,6 +87,72 @@ function parseResult(data) {
   return result
 }
 
+/**
+ * 中文翻译为英文（使用免费 MyMemory 翻译接口）
+ * @param {string} text 中文文本
+ * @returns {Promise} 翻译结果
+ */
+function translateZhToEn(text) {
+  const url =
+    'https://api.mymemory.translated.net/get?q=' +
+    encodeURIComponent(text) +
+    '&langpair=zh-CN|en'
+
+  return new Promise((resolve, reject) => {
+    $fetch
+      .fetch({
+        url: url,
+        method: 'GET'
+      })
+      .then((response) => {
+        const result = response.data
+        if (result.code === 200) {
+          try {
+            const data = JSON.parse(result.data)
+            const translated =
+              data && data.responseData ? data.responseData.translatedText : ''
+            if (translated) {
+              resolve({
+                type: 'translation',
+                word: text,
+                translation: translated,
+                meanings: [
+                  {
+                    partOfSpeech: '翻译',
+                    definitions: [
+                      {
+                        definition: translated,
+                        example: ''
+                      }
+                    ]
+                  }
+                ]
+              })
+            } else {
+              reject({ message: '翻译结果为空' })
+            }
+          } catch (e) {
+            reject({ message: '翻译数据解析失败' })
+          }
+        } else {
+          reject({ message: '翻译失败，错误码：' + result.code })
+        }
+      })
+      .catch((error) => {
+        reject({ message: '网络请求失败，请检查网络连接' })
+      })
+  })
+}
+
+/**
+ * 判断字符串是否包含中文字符
+ */
+function hasChinese(str) {
+  return /[\u4e00-\u9fa5]/.test(str)
+}
+
 export default {
-  lookupWord
+  lookupWord,
+  translateZhToEn,
+  hasChinese
 }
