@@ -67,7 +67,7 @@
     </div>
 
     <div class="footer-info">
-      <text class="footer-text">全能词典 V1.0.3</text>
+      <text class="footer-text">全能词典 V1.0.4</text>
       <text class="footer-sub">小默软件工作室</text>
     </div>
   </div>
@@ -108,7 +108,7 @@ export default {
   },
 
   onCheckUpdate() {
-    prompt.showToast({ message: '当前已是最新版本 V1.0.3' })
+    prompt.showToast({ message: '当前已是最新版本 V1.0.4' })
   },
 
   onFeedback() {
