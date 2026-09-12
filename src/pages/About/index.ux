@@ -1,0 +1,183 @@
+<!--
+  全能词典 - 关于页面
+-->
+
+<template>
+  <div class="page">
+    <div class="header">
+      <text class="app-name">全能词典</text>
+      <text class="version">V1.0.3</text>
+    </div>
+
+    <div class="info-card">
+      <div class="info-row">
+        <text class="info-label">开发者</text>
+        <text class="info-value">张岳</text>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="info-row">
+        <text class="info-label">开发团队</text>
+        <text class="info-value">小默软件工作室</text>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="info-row" onclick="copyEmail">
+        <text class="info-label">联系方式</text>
+        <text class="info-value email">{{ email }}</text>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="info-row" onclick="copyQQ">
+        <text class="info-label">交流群</text>
+        <text class="info-value qq">{{ qqGroup }}</text>
+      </div>
+    </div>
+
+    <div class="copy-tip">
+      <text class="tip-text">点击邮箱或群号可复制</text>
+    </div>
+
+    <div class="footer">
+      <text class="footer-text">© 2026 小默软件工作室</text>
+      <text class="footer-sub">保留所有权利</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import prompt from '@system.prompt'
+import clipboard from '@system.clipboard'
+
+export default {
+  private: {
+    email: 'zy291817@outlook.com',
+    qqGroup: '586352356'
+  },
+
+  onInit() {
+    this.$page.setTitleBar({ text: '关于' })
+  },
+
+  copyEmail() {
+    clipboard.set({
+      text: this.email,
+      success: () => {
+        prompt.showToast({ message: '邮箱已复制' })
+      }
+    })
+  },
+
+  copyQQ() {
+    clipboard.set({
+      text: this.qqGroup,
+      success: () => {
+        prompt.showToast({ message: '群号已复制' })
+      }
+    })
+  }
+}
+</script>
+
+<style lang="scss">
+@import './../../assets/styles/style.scss';
+
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0f1e;
+  align-items: center;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24 * $size-factor;
+  margin-bottom: 24 * $size-factor;
+}
+
+.app-name {
+  font-size: 28 * $size-factor;
+  color: #4facfe;
+  font-weight: bold;
+}
+
+.version {
+  font-size: 13 * $size-factor;
+  color: #8a8aa0;
+  margin-top: 4 * $size-factor;
+}
+
+.info-card {
+  width: 86%;
+  flex-direction: column;
+  background-color: #1a1a33;
+  border-radius: 14 * $size-factor;
+  padding: 4 * $size-factor 16 * $size-factor;
+}
+
+.info-row {
+  width: 100%;
+  height: 44 * $size-factor;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-label {
+  font-size: 14 * $size-factor;
+  color: #9fa8da;
+}
+
+.info-value {
+  font-size: 14 * $size-factor;
+  color: #ffffff;
+}
+
+.email {
+  color: #4facfe;
+}
+
+.qq {
+  color: #4facfe;
+}
+
+.divider {
+  width: 100%;
+  height: 1 * $size-factor;
+  background-color: #2a2a4e;
+}
+
+.copy-tip {
+  margin-top: 14 * $size-factor;
+}
+
+.tip-text {
+  font-size: 11 * $size-factor;
+  color: #6a6a8a;
+  text-align: center;
+}
+
+.footer {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30 * $size-factor;
+}
+
+.footer-text {
+  font-size: 11 * $size-factor;
+  color: #6a6a8a;
+  text-align: center;
+}
+
+.footer-sub {
+  font-size: 10 * $size-factor;
+  color: #4a4a6a;
+  text-align: center;
+  margin-top: 2 * $size-factor;
+}
+</style>

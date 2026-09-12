@@ -1,8 +1,8 @@
 {
   "package": "com.quanneng.dict",
   "name": "全能词典",
-  "versionName": "V1.2.0",
-  "versionCode": 3,
+  "versionName": "V1.0.3",
+  "versionCode": 4,
   "minPlatformVersion": 1070,
   "icon": "/assets/images/logo.png",
   "features": [
@@ -20,6 +20,9 @@
     },
     {
       "name": "system.storage"
+    },
+    {
+      "name": "system.clipboard"
     }
   ],
   "permissions": [
@@ -39,6 +42,12 @@
       },
       "pages/Dict": {
         "component": "index"
+      },
+      "pages/Settings": {
+        "component": "index"
+      },
+      "pages/About": {
+        "component": "index"
       }
     }
   },
@@ -53,6 +62,14 @@
       },
       "pages/Dict": {
         "titleBarText": "全能词典",
+        "menu": false
+      },
+      "pages/Settings": {
+        "titleBarText": "设置",
+        "menu": false
+      },
+      "pages/About": {
+        "titleBarText": "关于",
         "menu": false
       }
     }

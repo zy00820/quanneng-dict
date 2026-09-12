@@ -1,7 +1,7 @@
 <!--
-  全能词典 V1.2.0
+  全能词典 V1.0.3
   适配 iQOO Watch GT2 / Blue OS 3.0
-  新增：离线激活、拼音输入法（26/9键、中英切换）、系统键盘切换
+  新增：设置、关于页面；离线激活；拼音输入法
 -->
 
 <template>
@@ -9,9 +9,12 @@
     <!-- 顶部标题 + 输入法切换 -->
     <div class="header">
       <text class="app-title">全能词典</text>
-      <text class="ime-switch" onclick="onToggleIME">
-        {{ useCustomKB ? '系统键盘' : '拼音键盘' }}
-      </text>
+      <div class="header-right">
+        <text class="ime-switch" onclick="onToggleIME">
+          {{ useCustomKB ? '系统键盘' : '拼音键盘' }}
+        </text>
+        <text class="settings-btn" onclick="onSettings">⚙</text>
+      </div>
     </div>
 
     <!-- 搜索区域 -->
@@ -92,6 +95,7 @@
 <script>
 import dictionary from '../../helper/apis/dictionary'
 import PinyinKeyboard from '../../components/PinyinKeyboard/index.ux'
+import router from '@system.router'
 
 export default {
   components: {
@@ -119,6 +123,12 @@ export default {
     if (this.useCustomKB) {
       // 切换到自定义键盘时，清空系统输入
     }
+  },
+
+  // 跳转到设置页
+  onSettings() {
+    this.showKB = false
+    router.push({ uri: '/pages/Settings' })
   },
 
   showKeyboard() {
@@ -222,6 +232,11 @@ export default {
   padding-right: 12 * $size-factor;
 }
 
+.header-right {
+  flex-direction: row;
+  align-items: center;
+}
+
 .app-title {
   font-size: 20 * $size-factor;
   color: #4facfe;
@@ -235,6 +250,13 @@ export default {
   background-color: #1a1a33;
   border-radius: 10 * $size-factor;
   padding: 4 * $size-factor 8 * $size-factor;
+  margin-right: 8 * $size-factor;
+}
+
+.settings-btn {
+  font-size: 18 * $size-factor;
+  color: #9fa8da;
+  text-align: center;
 }
 
 .search-area {
