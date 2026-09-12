@@ -20,11 +20,16 @@
 
       <div class="payment-info">
         <text class="info-label">付款方式：</text>
-        <text class="info-value">微信 / 支付宝</text>
+        <text class="info-value">微信支付</text>
+      </div>
+
+      <!-- 微信付款码 -->
+      <div class="qrcode-box">
+        <image class="pay-qrcode" src="/assets/images/pay_qrcode.jpg"></image>
       </div>
 
       <div class="payment-tip">
-        <text class="tip-text">付款后请保留支付凭证</text>
+        <text class="tip-text">扫码付款后请保留支付凭证</text>
         <text class="tip-text">发送凭证至邮箱获取激活码</text>
       </div>
 
@@ -194,6 +199,19 @@ export default {
   font-size: 13 * $size-factor;
   color: #ffd700;
   font-weight: bold;
+}
+
+.qrcode-box {
+  width: 100%;
+  align-items: center;
+  margin-top: 10 * $size-factor;
+  margin-bottom: 10 * $size-factor;
+}
+
+.pay-qrcode {
+  width: 180 * $size-factor;
+  height: 180 * $size-factor;
+  border-radius: 12 * $size-factor;
 }
 
 .payment-tip {
