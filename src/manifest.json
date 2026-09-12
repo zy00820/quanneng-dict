@@ -1,8 +1,8 @@
 {
   "package": "com.quanneng.dict",
   "name": "全能词典",
-  "versionName": "V1.1.0",
-  "versionCode": 2,
+  "versionName": "V1.2.0",
+  "versionCode": 3,
   "minPlatformVersion": 1070,
   "icon": "/assets/images/logo.png",
   "features": [
@@ -17,6 +17,9 @@
     },
     {
       "name": "system.configuration"
+    },
+    {
+      "name": "system.storage"
     }
   ],
   "permissions": [
@@ -29,8 +32,11 @@
     "designWidth": 466
   },
   "router": {
-    "entry": "pages/Dict",
+    "entry": "pages/Activate",
     "pages": {
+      "pages/Activate": {
+        "component": "index"
+      },
       "pages/Dict": {
         "component": "index"
       }
@@ -41,6 +47,10 @@
     "titleBarTextColor": "#ffffff",
     "menu": false,
     "pages": {
+      "pages/Activate": {
+        "titleBarText": "全能词典 - 激活",
+        "menu": false
+      },
       "pages/Dict": {
         "titleBarText": "全能词典",
         "menu": false

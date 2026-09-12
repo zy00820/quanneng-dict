@@ -1,0 +1,278 @@
+<!--
+  全能词典 - 离线激活页
+  激活码：b32000
+-->
+
+<template>
+  <div class="page">
+    <div class="logo-area">
+      <text class="app-name">全能词典</text>
+      <text class="version">V1.2.0</text>
+    </div>
+
+    <div class="activate-card">
+      <text class="card-title">软件激活</text>
+
+      <div class="payment-info">
+        <text class="info-label">付款金额：</text>
+        <text class="info-value">￥2.00 元</text>
+      </div>
+
+      <div class="payment-info">
+        <text class="info-label">付款方式：</text>
+        <text class="info-value">微信 / 支付宝</text>
+      </div>
+
+      <div class="payment-tip">
+        <text class="tip-text">付款后请保留支付凭证</text>
+        <text class="tip-text">发送凭证至邮箱获取激活码</text>
+      </div>
+
+      <div class="email-box">
+        <text class="email-label">联系邮箱：</text>
+        <text class="email-text">{{ email }}</text>
+      </div>
+
+      <input
+        class="code-input"
+        type="text"
+        placeholder="请输入激活码"
+        value="{{ code }}"
+        onchange="onCodeChange"
+      />
+
+      <input
+        class="activate-btn"
+        type="button"
+        value="立即激活"
+        onclick="onActivate"
+      />
+
+      <text class="error-msg" if="{{ errorMsg }}">{{ errorMsg }}</text>
+    </div>
+
+    <div class="footer">
+      <text class="footer-text">离线激活 · 一次激活永久使用</text>
+    </div>
+  </div>
+</template>
+
+<script>
+import storage from '@system.storage'
+import router from '@system.router'
+
+// 正确的激活码
+const ACTIVATION_CODE = 'b32000'
+
+export default {
+  private: {
+    code: '',
+    errorMsg: '',
+    email: 'zy291817@outlook.com'
+  },
+
+  onInit() {
+    // 进入页面先检查是否已激活
+    this.checkActivation()
+  },
+
+  onCodeChange(e) {
+    this.code = e.value
+    this.errorMsg = ''
+  },
+
+  checkActivation() {
+    storage.get({
+      key: 'quanneng_dict_activated',
+      success: (data) => {
+        if (data && data === 'true') {
+          // 已激活，跳转到词典页
+          router.replace({ uri: '/pages/Dict' })
+        }
+      },
+      fail: (data, code) => {
+        // 未激活，留在激活页
+        console.log('未激活，code=' + code)
+      }
+    })
+  },
+
+  onActivate() {
+    const inputCode = (this.code || '').trim()
+    if (!inputCode) {
+      this.errorMsg = '请输入激活码'
+      return
+    }
+
+    if (inputCode === ACTIVATION_CODE) {
+      // 激活成功，保存状态到本地存储
+      storage.set({
+        key: 'quanneng_dict_activated',
+        value: 'true',
+        success: () => {
+          // 保存激活码
+          storage.set({
+            key: 'quanneng_dict_code',
+            value: inputCode,
+            success: () => {},
+            fail: () => {}
+          })
+          // 跳转到词典页
+          router.replace({ uri: '/pages/Dict' })
+        },
+        fail: (data, code) => {
+          this.errorMsg = '激活状态保存失败，请重试'
+        }
+      })
+    } else {
+      this.errorMsg = '激活码错误，请检查后重试'
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+@import './../../assets/styles/style.scss';
+
+.page {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0f1e;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-area {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20 * $size-factor;
+}
+
+.app-name {
+  font-size: 30 * $size-factor;
+  color: #4facfe;
+  font-weight: bold;
+  text-align: center;
+}
+
+.version {
+  font-size: 14 * $size-factor;
+  color: #8a8aa0;
+  margin-top: 4 * $size-factor;
+}
+
+.activate-card {
+  width: 88%;
+  flex-direction: column;
+  background-color: #1a1a33;
+  border-radius: 16 * $size-factor;
+  padding: 18 * $size-factor;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 20 * $size-factor;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 14 * $size-factor;
+}
+
+.payment-info {
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 8 * $size-factor;
+}
+
+.info-label {
+  font-size: 13 * $size-factor;
+  color: #9fa8da;
+}
+
+.info-value {
+  font-size: 13 * $size-factor;
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.payment-tip {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  background-color: #14142a;
+  border-radius: 10 * $size-factor;
+  padding: 10 * $size-factor;
+  margin-top: 6 * $size-factor;
+  margin-bottom: 10 * $size-factor;
+}
+
+.tip-text {
+  font-size: 12 * $size-factor;
+  color: #8ab4f8;
+  text-align: center;
+  line-height: 18 * $size-factor;
+}
+
+.email-box {
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f0f1e;
+  border-radius: 10 * $size-factor;
+  padding: 8 * $size-factor;
+  margin-bottom: 14 * $size-factor;
+}
+
+.email-label {
+  font-size: 12 * $size-factor;
+  color: #9fa8da;
+}
+
+.email-text {
+  font-size: 12 * $size-factor;
+  color: #4facfe;
+  margin-left: 4 * $size-factor;
+}
+
+.code-input {
+  width: 100%;
+  height: 42 * $size-factor;
+  background-color: #0f0f1e;
+  border-radius: 21 * $size-factor;
+  color: #ffffff;
+  font-size: 16 * $size-factor;
+  text-align: center;
+  padding-left: 16 * $size-factor;
+  padding-right: 16 * $size-factor;
+  margin-bottom: 12 * $size-factor;
+}
+
+.activate-btn {
+  width: 100%;
+  height: 42 * $size-factor;
+  border-radius: 21 * $size-factor;
+  background-color: $brand;
+  color: #ffffff;
+  font-size: 16 * $size-factor;
+  font-weight: bold;
+}
+
+.error-msg {
+  font-size: 12 * $size-factor;
+  color: #ff6b6b;
+  margin-top: 8 * $size-factor;
+  text-align: center;
+}
+
+.footer {
+  margin-top: 18 * $size-factor;
+}
+
+.footer-text {
+  font-size: 11 * $size-factor;
+  color: #4a4a6a;
+  text-align: center;
+}
+</style>
