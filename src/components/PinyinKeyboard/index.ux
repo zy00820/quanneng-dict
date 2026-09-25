@@ -159,7 +159,9 @@ export default {
       this.showCandidates = false
       return
     }
-    this.candidates = pinyin.getCandidates26(this.inputBuffer)
+    const result = pinyin.getCandidates26(this.inputBuffer)
+    // 限制最多 8 个候选词，避免渲染过多 DOM
+    this.candidates = result.slice(0, 8)
     this.showCandidates = this.candidates.length > 0
   },
 
@@ -170,7 +172,8 @@ export default {
       return
     }
     const result = pinyin.getCandidatesT9(this.inputBuffer)
-    this.candidates = result.candidates
+    // 限制最多 8 个候选词
+    this.candidates = result.candidates.slice(0, 8)
     this.showCandidates = this.candidates.length > 0
   },
 
