@@ -1,7 +1,7 @@
 <!--
   全能词典 V1.0.4
   适配 iQOO Watch GT2 / Blue OS 3.0
-  新增：设置、关于页面；离线激活；拼音输入法
+  优化：减少条件渲染、简化布局
 -->
 
 <template>
@@ -10,43 +10,21 @@
     <div class="header">
       <text class="app-title">全能词典</text>
       <div class="header-right">
-        <text class="ime-switch" onclick="onToggleIME">
-          {{ useCustomKB ? '系统键盘' : '拼音键盘' }}
-        </text>
+        <text class="ime-switch" onclick="onToggleIME">{{ useCustomKB ? '系统键盘' : '拼音键盘' }}</text>
         <text class="settings-btn" onclick="onSettings">⚙</text>
       </div>
     </div>
 
     <!-- 搜索区域 -->
     <div class="search-area">
-      <!-- 自定义键盘模式：用 text 展示输入内容 -->
-      <text class="search-input-text" if="{{ useCustomKB }}" onclick="showKeyboard">
-        {{ keyword || '点击输入...' }}
-      </text>
-      <!-- 系统键盘模式：用原生 input -->
-      <input
-        class="search-input"
-        else
-        type="text"
-        placeholder="输入单词..."
-        value="{{ keyword }}"
-        onchange="onKeywordChange"
-      />
-      <input
-        class="search-btn"
-        type="button"
-        value="查询"
-        onclick="onSearch"
-      />
+      <text class="search-input-text" if="{{ useCustomKB }}" onclick="showKeyboard">{{ keyword || '点击输入...' }}</text>
+      <input class="search-input" else type="text" placeholder="输入单词..." value="{{ keyword }}" onchange="onKeywordChange" />
+      <input class="search-btn" type="button" value="查询" onclick="onSearch" />
     </div>
 
-    <!-- 快捷单词 -->
-    <div class="quick-words" if="{{ !showKB }}">
-      <text
-        class="quick-word"
-        for="{{ quickWords }}"
-        onclick="onQuickWord($item)"
-      >{{ $item }}</text>
+    <!-- 快捷单词（仅在无键盘时显示） -->
+    <div class="quick-words" if="{{ !showKB && !result && !loading }}">
+      <text class="quick-word" for="{{ quickWords }}" onclick="onQuickWord($item)">{{ $item }}</text>
     </div>
 
     <!-- 加载中 -->
@@ -55,40 +33,17 @@
     </div>
 
     <!-- 查询结果 -->
-    <scroll class="result-area" if="{{ result && !loading && !showKB }}">
-      <div class="result-word">
-        <text class="word-text">{{ result.word }}</text>
-        <text class="phonetic-text" if="{{ result.phonetic }}">{{ result.phonetic }}</text>
-      </div>
-
+    <div class="result-area" if="{{ result && !loading && !showKB }}">
+      <text class="word-text">{{ result.word }}</text>
+      <text class="phonetic-text" if="{{ result.phonetic }}">{{ result.phonetic }}</text>
       <div class="meaning-list" for="{{ result.meanings }}">
         <text class="pos-text">{{ $item.partOfSpeech }}</text>
-        <div class="def-list" for="{{ $item.definitions }}">
-          <text class="def-text">• {{ $item.definition }}</text>
-          <text class="example-text" if="{{ $item.example }}">例：{{ $item.example }}</text>
-        </div>
+        <text class="def-text" for="{{ $item.definitions }}">• {{ $item.definition }}</text>
       </div>
-    </scroll>
-
-    <!-- 空状态 -->
-    <div class="empty" if="{{ !result && !loading && !showKB }}">
-      <text class="empty-text">输入单词或中文开始查询</text>
-      <text class="empty-sub">支持英文释义、中文翻译</text>
-    </div>
-
-    <!-- 错误提示 -->
-    <div class="error" if="{{ errorMsg && !loading }}">
-      <text class="error-text">{{ errorMsg }}</text>
     </div>
 
     <!-- 自定义拼音键盘 -->
-    <PinyinKeyboard
-      if="{{ useCustomKB && showKB }}"
-      oninput="onKBInput"
-      onbackspace="onKBBackspace"
-      onconfirm="onKBConfirm"
-      onhide="onKBHide"
-    ></PinyinKeyboard>
+    <PinyinKeyboard if="{{ useCustomKB && showKB }}" oninput="onKBInput" onbackspace="onKBBackspace" onconfirm="onKBConfirm" onhide="onKBHide"></PinyinKeyboard>
   </div>
 </template>
 
@@ -106,26 +61,20 @@ export default {
     keyword: '',
     loading: false,
     result: null,
-    errorMsg: '',
     quickWords: ['hello', 'world', 'apple', '你好', '学习'],
-    useCustomKB: true, // 是否使用自定义拼音键盘
-    showKB: false // 是否显示键盘
+    useCustomKB: true,
+    showKB: false
   },
 
   onKeywordChange(e) {
     this.keyword = e.value
   },
 
-  // 输入法切换（自定义拼音键盘 / 系统键盘）
   onToggleIME() {
     this.useCustomKB = !this.useCustomKB
     this.showKB = false
-    if (this.useCustomKB) {
-      // 切换到自定义键盘时，清空系统输入
-    }
   },
 
-  // 跳转到设置页
   onSettings() {
     this.showKB = false
     router.push({ uri: '/pages/Settings' })
@@ -135,7 +84,6 @@ export default {
     this.showKB = true
   },
 
-  // 自定义键盘输入
   onKBInput(e) {
     const text = e.detail || e
     this.keyword += text
@@ -163,7 +111,6 @@ export default {
   onSearch() {
     const word = (this.keyword || '').trim()
     if (!word) {
-      this.errorMsg = '请输入要查询的内容'
       this.result = null
       return
     }
@@ -172,36 +119,28 @@ export default {
 
   search(word) {
     this.loading = true
-    this.errorMsg = ''
     this.result = null
 
-    // 判断是中文还是英文
     if (dictionary.hasChinese(word)) {
-      // 中文：翻译为英文
       dictionary
         .translateZhToEn(word)
         .then((data) => {
           this.result = data
         })
-        .catch((err) => {
-          this.errorMsg = err.message || '翻译失败'
+        .catch(() => {
+          this.result = null
         })
         .finally(() => {
           this.loading = false
         })
     } else {
-      // 英文：查词典
       dictionary
         .lookupWord(word)
         .then((data) => {
-          if (data) {
-            this.result = data
-          } else {
-            this.errorMsg = '未查询到结果'
-          }
+          this.result = data || null
         })
-        .catch((err) => {
-          this.errorMsg = err.message || '查询失败'
+        .catch(() => {
+          this.result = null
         })
         .finally(() => {
           this.loading = false
@@ -223,13 +162,13 @@ export default {
 
 .header {
   width: 100%;
-  height: 50 * $size-factor;
+  height: 42px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-top: 6 * $size-factor;
-  padding-left: 12 * $size-factor;
-  padding-right: 12 * $size-factor;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
 }
 
 .header-right {
@@ -238,69 +177,66 @@ export default {
 }
 
 .app-title {
-  font-size: 20 * $size-factor;
+  font-size: 18px;
   color: #4facfe;
   font-weight: bold;
-  text-align: center;
 }
 
 .ime-switch {
-  font-size: 12 * $size-factor;
+  font-size: 11px;
   color: #ffd700;
   background-color: #1a1a33;
-  border-radius: 10 * $size-factor;
-  padding: 4 * $size-factor 8 * $size-factor;
-  margin-right: 8 * $size-factor;
+  border-radius: 8px;
+  padding: 3px 6px;
+  margin-right: 6px;
 }
 
 .settings-btn {
-  font-size: 18 * $size-factor;
+  font-size: 16px;
   color: #9fa8da;
-  text-align: center;
 }
 
 .search-area {
   flex-direction: row;
   width: 100%;
-  height: 50 * $size-factor;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  padding-left: 10 * $size-factor;
-  padding-right: 10 * $size-factor;
-  margin-top: 2 * $size-factor;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-top: 2px;
 }
 
 .search-input {
   flex: 1;
-  height: 40 * $size-factor;
+  height: 36px;
   background-color: #1e1e36;
-  border-radius: 20 * $size-factor;
+  border-radius: 18px;
   color: #ffffff;
-  font-size: 15 * $size-factor;
-  padding-left: 14 * $size-factor;
-  padding-right: 14 * $size-factor;
+  font-size: 14px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .search-input-text {
   flex: 1;
-  height: 40 * $size-factor;
+  height: 36px;
   background-color: #1e1e36;
-  border-radius: 20 * $size-factor;
+  border-radius: 18px;
   color: #ffffff;
-  font-size: 15 * $size-factor;
-  padding-left: 14 * $size-factor;
-  padding-right: 14 * $size-factor;
-  line-height: 40 * $size-factor;
+  font-size: 14px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .search-btn {
-  width: 58 * $size-factor;
-  height: 40 * $size-factor;
-  margin-left: 6 * $size-factor;
-  border-radius: 20 * $size-factor;
-  background-color: $brand;
+  width: 50px;
+  height: 36px;
+  margin-left: 4px;
+  border-radius: 18px;
+  background-color: #4facfe;
   color: #ffffff;
-  font-size: 14 * $size-factor;
+  font-size: 13px;
 }
 
 .quick-words {
@@ -308,130 +244,89 @@ export default {
   width: 100%;
   flex-wrap: wrap;
   justify-content: center;
-  padding-left: 10 * $size-factor;
-  padding-right: 10 * $size-factor;
-  margin-top: 6 * $size-factor;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-top: 4px;
 }
 
 .quick-word {
-  font-size: 12 * $size-factor;
+  font-size: 11px;
   color: #8ab4f8;
   background-color: #1a1a33;
-  border-radius: 10 * $size-factor;
-  padding: 4 * $size-factor 10 * $size-factor;
-  margin: 3 * $size-factor;
+  border-radius: 8px;
+  padding: 3px 8px;
+  margin: 2px;
 }
 
 .loading {
   width: 100%;
-  height: 50 * $size-factor;
+  height: 40px;
   justify-content: center;
   align-items: center;
-  margin-top: 16 * $size-factor;
+  margin-top: 10px;
 }
 
 .loading-text {
-  font-size: 14 * $size-factor;
-  color: $brand;
+  font-size: 13px;
+  color: #4facfe;
 }
 
 .result-area {
   flex: 1;
   width: 100%;
-  padding-left: 12 * $size-factor;
-  padding-right: 12 * $size-factor;
-  padding-top: 6 * $size-factor;
-}
-
-.result-word {
-  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
   flex-direction: column;
-  align-items: center;
-  margin-bottom: 8 * $size-factor;
 }
 
 .word-text {
-  font-size: 24 * $size-factor;
+  font-size: 22px;
   color: #ffffff;
   font-weight: bold;
+  text-align: center;
+  margin-bottom: 4px;
 }
 
 .phonetic-text {
-  font-size: 13 * $size-factor;
+  font-size: 12px;
   color: #9fa8da;
-  margin-top: 3 * $size-factor;
+  text-align: center;
+  margin-bottom: 6px;
 }
 
 .meaning-list {
   width: 100%;
   flex-direction: column;
-  margin-bottom: 8 * $size-factor;
+  margin-bottom: 6px;
   background-color: #1a1a33;
-  border-radius: 10 * $size-factor;
-  padding: 8 * $size-factor;
+  border-radius: 8px;
+  padding: 6px;
 }
 
 .pos-text {
-  font-size: 13 * $size-factor;
-  color: $brand;
+  font-size: 12px;
+  color: #4facfe;
   font-weight: bold;
-  margin-bottom: 5 * $size-factor;
-}
-
-.def-list {
-  width: 100%;
-  flex-direction: column;
-  margin-bottom: 5 * $size-factor;
+  margin-bottom: 3px;
 }
 
 .def-text {
-  font-size: 12 * $size-factor;
+  font-size: 11px;
   color: #e0e0e0;
-  line-height: 16 * $size-factor;
-}
-
-.example-text {
-  font-size: 11 * $size-factor;
-  color: #8a8a9a;
-  line-height: 14 * $size-factor;
-  margin-top: 3 * $size-factor;
-  padding-left: 10 * $size-factor;
+  margin-bottom: 2px;
 }
 
 .empty {
   width: 100%;
   flex: 1;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 .empty-text {
-  font-size: 14 * $size-factor;
+  font-size: 13px;
   color: #6a6a8a;
   text-align: center;
-}
-
-.empty-sub {
-  font-size: 11 * $size-factor;
-  color: #4a4a6a;
-  text-align: center;
-  margin-top: 5 * $size-factor;
-}
-
-.error {
-  width: 100%;
-  height: 50 * $size-factor;
-  justify-content: center;
-  align-items: center;
-  margin-top: 8 * $size-factor;
-}
-
-.error-text {
-  font-size: 13 * $size-factor;
-  color: #ff6b6b;
-  text-align: center;
-  padding-left: 16 * $size-factor;
-  padding-right: 16 * $size-factor;
 }
 </style>

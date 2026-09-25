@@ -1,84 +1,88 @@
 <!--
-  全能词典 - 自定义拼音键盘组件
-  支持 26键/9键切换、中/英切换
+  全能词典 - 自定义拼音键盘组件（轻量版）
+  优化：减少DOM节点、去除嵌套for、防抖、移除scroll
 -->
 
 <template>
   <div class="keyboard-panel">
-    <!-- 候选词栏 -->
+    <!-- 候选词栏（最多5个，横向排列） -->
     <div class="candidate-bar" if="{{ showCandidates }}">
-      <scroll class="candidate-scroll" scrollpage="true">
-        <div class="candidate-list">
-          <text
-            class="candidate-item"
-            for="{{ candidates }}"
-            onclick="onSelectCandidate($idx)"
-          >{{ $item }}</text>
-        </div>
-      </scroll>
+      <text class="candidate-item" for="{{ candidates }}" onclick="onSelectCandidate($idx)">{{ $item }}</text>
     </div>
+
+    <!-- 拼音缓冲显示 -->
+    <text class="pinyin-buffer" if="{{ inputBuffer }}">{{ inputBuffer }}</text>
 
     <!-- 26键键盘 -->
     <div class="kb-26" if="{{ layout === '26' }}">
-      <div class="kb-row" for="{{ rows26 }}">
-        <div
-          class="kb-key"
-          for="{{ $item }}"
-          onclick="onKey26($item)"
-        >
-          <text class="key-text">{{ $item }}</text>
-        </div>
+      <div class="kb-row">
+        <text class="kb-key" onclick="onKey26('q')">q</text>
+        <text class="kb-key" onclick="onKey26('w')">w</text>
+        <text class="kb-key" onclick="onKey26('e')">e</text>
+        <text class="kb-key" onclick="onKey26('r')">r</text>
+        <text class="kb-key" onclick="onKey26('t')">t</text>
+        <text class="kb-key" onclick="onKey26('y')">y</text>
+        <text class="kb-key" onclick="onKey26('u')">u</text>
+        <text class="kb-key" onclick="onKey26('i')">i</text>
+        <text class="kb-key" onclick="onKey26('o')">o</text>
+        <text class="kb-key" onclick="onKey26('p')">p</text>
+      </div>
+      <div class="kb-row">
+        <text class="kb-key" onclick="onKey26('a')">a</text>
+        <text class="kb-key" onclick="onKey26('s')">s</text>
+        <text class="kb-key" onclick="onKey26('d')">d</text>
+        <text class="kb-key" onclick="onKey26('f')">f</text>
+        <text class="kb-key" onclick="onKey26('g')">g</text>
+        <text class="kb-key" onclick="onKey26('h')">h</text>
+        <text class="kb-key" onclick="onKey26('j')">j</text>
+        <text class="kb-key" onclick="onKey26('k')">k</text>
+        <text class="kb-key" onclick="onKey26('l')">l</text>
+      </div>
+      <div class="kb-row">
+        <text class="kb-key" onclick="onKey26('z')">z</text>
+        <text class="kb-key" onclick="onKey26('x')">x</text>
+        <text class="kb-key" onclick="onKey26('c')">c</text>
+        <text class="kb-key" onclick="onKey26('v')">v</text>
+        <text class="kb-key" onclick="onKey26('b')">b</text>
+        <text class="kb-key" onclick="onKey26('n')">n</text>
+        <text class="kb-key" onclick="onKey26('m')">m</text>
       </div>
       <div class="kb-row kb-row-func">
-        <div class="kb-key func-key" onclick="onToggleLang">
-          <text class="key-text">{{ lang }}</text>
-        </div>
-        <div class="kb-key func-key wide" onclick="onSpace">
-          <text class="key-text">空格</text>
-        </div>
-        <div class="kb-key func-key" onclick="onBackspace">
-          <text class="key-text">⌫</text>
-        </div>
-        <div class="kb-key func-key confirm-key" onclick="onConfirm">
-          <text class="key-text">确定</text>
-        </div>
+        <text class="kb-key func-key" onclick="onToggleLang">{{ lang }}</text>
+        <text class="kb-key func-key wide" onclick="onSpace">空格</text>
+        <text class="kb-key func-key" onclick="onBackspace">⌫</text>
+        <text class="kb-key func-key confirm-key" onclick="onConfirm">确定</text>
       </div>
     </div>
 
     <!-- 9键键盘 -->
     <div class="kb-9" if="{{ layout === '9' }}">
-      <div class="kb-row-9" for="{{ rows9 }}">
-        <div
-          class="kb-key-9"
-          for="{{ $item }}"
-          onclick="onKey9($item)"
-        >
-          <text class="key-num">{{ $item.num }}</text>
-          <text class="key-letters">{{ $item.letters }}</text>
-        </div>
+      <div class="kb-row-9">
+        <text class="kb-key-9" onclick="onKey9({ num: '1', letters: '' })">1</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '2', letters: 'ABC' })">2 ABC</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '3', letters: 'DEF' })">3 DEF</text>
+      </div>
+      <div class="kb-row-9">
+        <text class="kb-key-9" onclick="onKey9({ num: '4', letters: 'GHI' })">4 GHI</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '5', letters: 'JKL' })">5 JKL</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '6', letters: 'MNO' })">6 MNO</text>
+      </div>
+      <div class="kb-row-9">
+        <text class="kb-key-9" onclick="onKey9({ num: '7', letters: 'PQRS' })">7 PQRS</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '8', letters: 'TUV' })">8 TUV</text>
+        <text class="kb-key-9" onclick="onKey9({ num: '9', letters: 'WXYZ' })">9 WXYZ</text>
       </div>
       <div class="kb-row-9 kb-row-func-9">
-        <div class="kb-key-9 func-key" onclick="onToggleLang">
-          <text class="key-num">{{ lang }}</text>
-        </div>
-        <div class="kb-key-9 func-key" onclick="onSpace">
-          <text class="key-num">空格</text>
-        </div>
-        <div class="kb-key-9 func-key" onclick="onBackspace">
-          <text class="key-num">⌫</text>
-        </div>
-        <div class="kb-key-9 func-key confirm-key" onclick="onConfirm">
-          <text class="key-num">确定</text>
-        </div>
+        <text class="kb-key-9 func-key" onclick="onToggleLang">{{ lang }}</text>
+        <text class="kb-key-9 func-key" onclick="onSpace">空格</text>
+        <text class="kb-key-9 func-key" onclick="onBackspace">⌫</text>
+        <text class="kb-key-9 func-key confirm-key" onclick="onConfirm">确定</text>
       </div>
     </div>
 
     <!-- 底部切换栏 -->
     <div class="bottom-bar">
-      <text class="switch-btn" onclick="onToggleLayout">
-        {{ layout === '26' ? '9键' : '26键' }}
-      </text>
-      <text class="input-display">{{ inputBuffer }}</text>
+      <text class="switch-btn" onclick="onToggleLayout">{{ layout === '26' ? '9键' : '26键' }}</text>
       <text class="switch-btn" onclick="onHideKeyboard">收起</text>
     </div>
   </div>
@@ -88,69 +92,45 @@
 import pinyin from '../../helper/pinyin'
 
 export default {
-  props: {
-    visible: {
-      default: true
-    }
-  },
-
   private: {
-    layout: '26', // '26' or '9'
-    lang: '中', // '中' or 'EN'
-    inputBuffer: '', // 当前输入的拼音/字母
+    layout: '26',
+    lang: '中',
+    inputBuffer: '',
     candidates: [],
     showCandidates: false,
-    rows26: [
-      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-      ['z', 'x', 'c', 'v', 'b', 'n', 'm']
-    ],
-    rows9: [
-      [
-        { num: '1', letters: '' },
-        { num: '2', letters: 'ABC' },
-        { num: '3', letters: 'DEF' }
-      ],
-      [
-        { num: '4', letters: 'GHI' },
-        { num: '5', letters: 'JKL' },
-        { num: '6', letters: 'MNO' }
-      ],
-      [
-        { num: '7', letters: 'PQRS' },
-        { num: '8', letters: 'TUV' },
-        { num: '9', letters: 'WXYZ' }
-      ]
-    ]
+    debounceTimer: null
   },
 
   onKey26(key) {
     if (this.lang === 'EN') {
-      // 英文模式：直接输入字母
       this.$emit('input', key)
     } else {
-      // 中文模式：累积拼音
       this.inputBuffer += key
-      this.updateCandidates()
+      this.debouncedUpdate()
     }
   },
 
   onKey9(key) {
     if (key.num === '1') {
-      // 1键：标点符号
-      const punctuations = [',', '.', '?', '!', '，', '。', '？', '！']
-      this.$emit('input', punctuations[0])
+      this.$emit('input', ',')
       return
     }
-
     if (this.lang === 'EN') {
-      // 英文9键：取该键第一个字母
       this.$emit('input', key.letters[0].toLowerCase())
     } else {
-      // 中文9键：累积数字
       this.inputBuffer += key.num
-      this.updateCandidatesT9()
+      this.debouncedUpdate()
     }
+  },
+
+  // 防抖更新候选词，避免快速输入时频繁计算
+  debouncedUpdate() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer)
+    }
+    this.debounceTimer = setTimeout(() => {
+      this.updateCandidates()
+    }, 200)
   },
 
   updateCandidates() {
@@ -159,21 +139,14 @@ export default {
       this.showCandidates = false
       return
     }
-    const result = pinyin.getCandidates26(this.inputBuffer)
-    // 限制最多 8 个候选词，避免渲染过多 DOM
-    this.candidates = result.slice(0, 8)
-    this.showCandidates = this.candidates.length > 0
-  },
-
-  updateCandidatesT9() {
-    if (!this.inputBuffer) {
-      this.candidates = []
-      this.showCandidates = false
-      return
+    let result
+    if (this.layout === '26') {
+      result = pinyin.getCandidates26(this.inputBuffer)
+    } else {
+      result = pinyin.getCandidatesT9(this.inputBuffer)
+      result = result ? result.candidates : []
     }
-    const result = pinyin.getCandidatesT9(this.inputBuffer)
-    // 限制最多 8 个候选词
-    this.candidates = result.candidates.slice(0, 8)
+    this.candidates = result.slice(0, 5)
     this.showCandidates = this.candidates.length > 0
   },
 
@@ -190,25 +163,19 @@ export default {
   onSpace() {
     if (this.lang === 'EN') {
       this.$emit('input', ' ')
-    } else {
-      // 中文模式下空格：如果有候选词，选第一个；否则输入空格
-      if (this.candidates.length > 0) {
-        this.onSelectCandidate(0)
-      } else {
-        this.$emit('input', ' ')
-      }
+    } else if (this.candidates.length > 0) {
+      this.onSelectCandidate(0)
     }
   },
 
   onBackspace() {
     if (this.inputBuffer.length > 0) {
       this.inputBuffer = this.inputBuffer.slice(0, -1)
-      if (this.lang === '中') {
-        if (this.layout === '26') {
-          this.updateCandidates()
-        } else {
-          this.updateCandidatesT9()
-        }
+      if (this.inputBuffer) {
+        this.debouncedUpdate()
+      } else {
+        this.candidates = []
+        this.showCandidates = false
       }
     } else {
       this.$emit('backspace')
@@ -249,75 +216,71 @@ export default {
   width: 100%;
   flex-direction: column;
   background-color: #1a1a2e;
-  border-top-width: 1 * $size-factor;
+  border-top-width: 1px;
   border-top-color: #2a2a4e;
+  padding-bottom: 4px;
 }
 
 .candidate-bar {
   width: 100%;
-  height: 36 * $size-factor;
-  background-color: #14142a;
-  padding-left: 6 * $size-factor;
-  padding-right: 6 * $size-factor;
-}
-
-.candidate-scroll {
-  width: 100%;
-  height: 100%;
-}
-
-.candidate-list {
+  height: 32px;
   flex-direction: row;
-  height: 100%;
   align-items: center;
+  padding-left: 4px;
+  padding-right: 4px;
+  background-color: #14142a;
 }
 
 .candidate-item {
-  font-size: 16 * $size-factor;
+  font-size: 14px;
   color: #ffffff;
   background-color: #2a2a4e;
-  border-radius: 6 * $size-factor;
-  padding: 4 * $size-factor 10 * $size-factor;
-  margin-right: 6 * $size-factor;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-right: 4px;
   text-align: center;
+}
+
+.pinyin-buffer {
+  width: 100%;
+  height: 22px;
+  font-size: 12px;
+  color: #ffd700;
+  text-align: center;
+  background-color: #0f0f1e;
 }
 
 .kb-26,
 .kb-9 {
   width: 100%;
   flex-direction: column;
-  padding: 4 * $size-factor;
+  padding: 2px;
 }
 
 .kb-row {
   flex-direction: row;
   justify-content: center;
   width: 100%;
-  margin-bottom: 3 * $size-factor;
+  margin-bottom: 2px;
 }
 
 .kb-key {
-  width: 36 * $size-factor;
-  height: 32 * $size-factor;
+  width: 32px;
+  height: 30px;
   background-color: #2a2a4e;
-  border-radius: 6 * $size-factor;
-  justify-content: center;
-  align-items: center;
-  margin: 0 2 * $size-factor;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #ffffff;
+  text-align: center;
+  margin: 0 1px;
 }
 
 .kb-key:active {
   background-color: #4facfe;
 }
 
-.key-text {
-  font-size: 14 * $size-factor;
-  color: #ffffff;
-  text-align: center;
-}
-
 .kb-row-func {
-  margin-top: 2 * $size-factor;
+  margin-top: 1px;
 }
 
 .func-key {
@@ -325,11 +288,11 @@ export default {
 }
 
 .wide {
-  width: 70 * $size-factor;
+  width: 60px;
 }
 
 .confirm-key {
-  background-color: $brand;
+  background-color: #4facfe;
 }
 
 /* 9键键盘 */
@@ -337,61 +300,42 @@ export default {
   flex-direction: row;
   justify-content: center;
   width: 100%;
-  margin-bottom: 4 * $size-factor;
+  margin-bottom: 2px;
 }
 
 .kb-key-9 {
-  width: 80 * $size-factor;
-  height: 40 * $size-factor;
+  width: 72px;
+  height: 34px;
   background-color: #2a2a4e;
-  border-radius: 8 * $size-factor;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0 3 * $size-factor;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #ffffff;
+  text-align: center;
+  margin: 0 2px;
 }
 
 .kb-key-9:active {
   background-color: #4facfe;
 }
 
-.key-num {
-  font-size: 16 * $size-factor;
-  color: #ffffff;
-  text-align: center;
-}
-
-.key-letters {
-  font-size: 9 * $size-factor;
-  color: #8a8aa0;
-  text-align: center;
-}
-
 .kb-row-func-9 .kb-key-9 {
-  width: 70 * $size-factor;
-  height: 36 * $size-factor;
+  width: 62px;
+  height: 32px;
 }
 
 .bottom-bar {
   width: 100%;
-  height: 30 * $size-factor;
+  height: 26px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-left: 10 * $size-factor;
-  padding-right: 10 * $size-factor;
+  padding-left: 8px;
+  padding-right: 8px;
   background-color: #0f0f1e;
 }
 
 .switch-btn {
-  font-size: 12 * $size-factor;
+  font-size: 11px;
   color: #4facfe;
-}
-
-.input-display {
-  font-size: 13 * $size-factor;
-  color: #ffd700;
-  text-align: center;
-  flex: 1;
 }
 </style>
